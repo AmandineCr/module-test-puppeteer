@@ -1,4 +1,5 @@
 const timeout = 15000
+const $username = "Blob28"
 
 // série de tests sur la page d'accueil
 describe("Tests registration", () => {
@@ -19,8 +20,10 @@ describe("Tests registration", () => {
     // cette fonction est lancée avant chaque test de cette
     // série de tests
     beforeAll(async () => {
-        // ouvrir un onglet dans le navigateur
         page = await global.__BROWSER__.newPage()
+        page.on('dialog', async dialog => {
+            await dialog.accept();
+        });
         await page.goto('http://polr.campus-grenoble.fr')
         await page.waitForSelector('body')
         await clickOnNavbar(page, 'Sign In ')
@@ -33,20 +36,11 @@ describe("Tests registration", () => {
         await page.waitForSelector('[href="#admin"]')
         await page.click('[href="#admin"]')
         await page.waitForSelector('input[aria-controls="admin_users_table"]')
-        await page.type('input[aria-controls="admin_users_table"]', 'blob13')
-        await page.waitFor(2000)
-        await page.evaluate(() => {
-            window.scrollTo(0, document.getElementById('admin_links_table_wrapper').offsetHeight)
-        });
-
-        await page.evaluate(() => {
-            let btns = document.querySelectorAll("#admin_users_table tr:first-child a")
-            btns[btns.length-1].click()
-        });
-
-        await page.waitFor(2000)
-
-        await page.screenshot({path: './tests/img/hahahah.png'})
+        await page.type('input[aria-controls="admin_users_table"]', $username)
+        await page.waitFor(1000)
+        const user = await page.$eval("#admin_users_table tr:first-child td:first-child", el => el.innerHTML);
+        if (user === $username)
+            await page.click("#admin_users_table tr:first-child a.btn-danger")
     }, timeout)
 })
 
