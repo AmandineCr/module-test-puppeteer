@@ -13,7 +13,16 @@ describe("Tests registration", () => {
         // récupérer le contenu de l'élément <body>
         const html = await page.$eval('body', e => e.innerHTML)
         // vérifier que dans cet élément Body on trouve "Polr du campus"
-        expect(html).toContain("Polr du campus")
+        expect(html).toContain("Register")
+        await page.screenshot({path: './tests/img/pg-register.png'});
+        await page.waitForSelector('.form-field')
+        await page.type('.form-field[name="username"]', 'testsignup')
+        await page.type('.form-field[name="password"]', 'test')
+        await page.type('.form-field[name="email"]', 'test@test.test')
+        await page.screenshot({path: './tests/img/signupformcomplete.png'});
+        await page.click('.ng-valid.btn-success');
+        await page.screenshot({path: './tests/img/clickregisterbutton.png'});
+
     }, timeout)
 
     // cette fonction est lancée avant chaque test de cette
