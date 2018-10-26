@@ -21,6 +21,7 @@ describe("Tests registration", () => {
     // série de tests
     beforeAll(async () => {
         page = await global.__BROWSER__.newPage()
+        // Accepte toutes les alertes
         page.on('dialog', async dialog => {
             await dialog.accept();
         });
