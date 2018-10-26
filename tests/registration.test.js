@@ -1,5 +1,5 @@
 const timeout = 15000
-const $username = "Blob28"
+const $username = "testsignup"
 
 // série de tests sur la page d'accueil
 describe("Tests registration", () => {
@@ -8,13 +8,51 @@ describe("Tests registration", () => {
     // vérification du chargement de la page d'accueil
     test('home', async () => {
         // charger la page d'accueil
-        await page.goto('http://polr.campus-grenoble.fr/signup')
+        await page.goto('http://polr.campus-grenoble.fr')
         // attendre que l'élément <body> soit chargé
         await page.waitForSelector('body')
         // récupérer le contenu de l'élément <body>
-        const html = await page.$eval('body', e => e.innerHTML)
-        // vérifier que dans cet élément Body on trouve "Polr du campus"
+        let html = await page.$eval('body', e => e.innerHTML)
         expect(html).toContain("Polr du campus")
+        await clickOnNavbar(page, "Sign Up")
+        await page.waitForNavigation()
+        await page.screenshot({path: './tests/img/pageSignUp.png'});
+
+        const usernameSelector = 'form[action="/signup"] *:nth-child(1)';
+        const passwordSelector = 'form[action="/signup"] *:nth-child(2)';
+        const emailSelector = 'form[action="/signup"] *:nth-child(3)';
+        const btnRegisterSelector = 'form[action="/signup"] *:nth-child(5)';
+
+        const pageTitle = await page.$eval('h2.title', e => e.innerHTML)
+        expect(pageTitle.toLowerCase()).toEqual("register")
+
+        const username = await page.$eval(usernameSelector, e => e.name)
+        expect(username.toLowerCase()).toEqual('username')
+
+        const password = await page.$eval(passwordSelector, e => e.name)
+        expect(password.toLowerCase()).toEqual('password')
+
+        const email = await page.$eval(emailSelector, e => e.name)
+        expect(email.toLowerCase()).toEqual('email')
+
+        const btnRegister = await page.$eval(btnRegisterSelector, e => e.value)
+        expect(btnRegister.toLowerCase()).toEqual('register')
+
+        await page.screenshot({path: './tests/img/pg-register.png'});
+        await page.waitForSelector('.form-field')
+        await page.type(usernameSelector, $username)
+        await page.type(passwordSelector, 'test')
+        await page.type(emailSelector, 'test@test.test')
+        await page.screenshot({path: './tests/img/signupformcomplete.png'});
+        await page.click(btnRegisterSelector);
+        await page.screenshot({path: './tests/img/clickregisterbutton.png'});
+
+        html = await page.$eval('body', e => e.innerHTML)
+        expect(html).toContain("Login")
+
+
+
+
     }, timeout)
 
     // cette fonction est lancée avant chaque test de cette
@@ -42,12 +80,14 @@ describe("Tests registration", () => {
         const user = await page.$eval("#admin_users_table tr:first-child td:first-child", el => el.innerHTML);
         if (user === $username)
             await page.click("#admin_users_table tr:first-child a.btn-danger")
+        await clickOnNavbar(page, 'logout')
+        await page.waitForSelector('body')
     }, timeout)
 })
 
 async function clickOnNavbar($page, textContent) {
     await $page.evaluate((textContent) => {
-        let f = () => el => el.textContent === textContent
+        let f = () => el => el.textContent.toLowerCase() === textContent.toLowerCase()
         Array
             .from(document.querySelectorAll('#navbar li a'))
             .filter(f())[0].click()
